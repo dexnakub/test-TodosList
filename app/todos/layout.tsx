@@ -2,7 +2,10 @@
 
 import ITodos from "../interface/todos.interface";
 
-import { AppWrapper } from './context'
+// import { AppWrapper } from './context'
+
+import React, { useState } from 'react';
+import AppContext from './context'; // นำเข้า AppContext ที่เราได้สร้างไว้
 
 export default function TodosLayout(
     {
@@ -11,11 +14,16 @@ export default function TodosLayout(
         children: React.ReactNode;
     }>) {
 
+    const [name, setName] = useState<string>('');
+
     return (
         <section >
-            <AppWrapper>
+            {/* <AppWrapper>
                 {children}
-            </AppWrapper>
+            </AppWrapper> */}
+            <AppContext.Provider value={{ name, setName }}>
+                {children}
+            </AppContext.Provider>
         </section>
     );
 }
