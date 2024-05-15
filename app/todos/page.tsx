@@ -19,7 +19,6 @@ export default function Todos() {
     const [todosVegetableState, setTodosVegetableState] = useState<ITodos[]>([]);
     // const { nameAll, setNameAll, nameFruit, setNameFruit } = useContext(AppContext);
 
-
     async function getData() {
         try {
             const response = await fetch('http://localhost:3000/api/todos').then(function (response) {
@@ -62,8 +61,7 @@ export default function Todos() {
         startInterval(removedDataClick, addDataClick[0]);
     }
 
-    //------------------ test settimeout-------------------------
-    const [timerID, setTimerID] = useState([]);
+    //------------------ settimeout-------------------------
     const [timerQueue, setTimerQueue] = useState<ITimerItem[]>([]);
     const [completedTimers, setCompletedTimers] = useState<string[]>([]);
 
@@ -83,7 +81,7 @@ export default function Todos() {
     // ฟังก์ชันในการตั้งค่าเมื่อ timer สิ้นสุดการทำงาน
     const handleTimerCompletion = (id: any, timerId: any) => {
         clearTimeout(timerId);  // ล้าง timeout
-        setCompletedTimers((completed) => [...completed, id]);
+        setCompletedTimers((completed) => [...completed, id]); // เพิ่ม queue ที่เสร็จแล้ว
         setTimerQueue((queue) => queue.filter((item) => item.id !== id));  // ลบ timer ที่เสร็จสิ้นแล้วออกจาก queue
     };
 
@@ -97,7 +95,7 @@ export default function Todos() {
         // console.log('Completed Timers:', completedTimers);
     }, [completedTimers]);
 
-    //------------------ test settimeout-------------------------
+    //------------------ settimeout-------------------------
 
     const startInterval = (dataAll: ITodos[], dataAdd: ITodos) => {
         const selectedState = dataCard.find(card => card.type == dataAdd.type)?.setState;
@@ -114,7 +112,7 @@ export default function Todos() {
                         return [...prevState, dataAdd]
                     }
                 });
-                handleTimerCompletion(id_q, timerId); // Pass timerId here
+                handleTimerCompletion(id_q, timerId);
             }, 5000);
             updateTimerQueue(id_q, timerId);
         }
@@ -135,8 +133,8 @@ export default function Todos() {
             const foundItem = timerQueue.find((item) => item.id === name);
             const timerId = foundItem ? foundItem.timerId : undefined;
 
-            clearTimeout(timerId);  // ล้าง timeout
-            setTimerQueue((queue) => queue.filter((item) => item.id !== name));  // ลบ timer ที่เสร็จสิ้นแล้วออกจาก queue
+            clearTimeout(timerId);
+            setTimerQueue((queue) => queue.filter((item) => item.id !== name));
 
             const selectedState = dataCard.find(card => card.type == type)?.setState;
             if (selectedState) {
