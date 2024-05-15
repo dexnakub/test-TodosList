@@ -8,25 +8,50 @@ import AppContext from './context';
 export default function Child() {
 
     // const { name, setName } = useAppContext() 
-    const { name, setName } = useContext(AppContext);
-    const [nameChild, setNameChild] = useState<string>('Name Default');
+    const { nameAll, setNameAll, nameFruit, setNameFruit } = useContext(AppContext);
+    // const [nameChild, setNameChild] = useState<string>('Name Default');
 
-    const updateName = () => {
-        console.log('updateName')
-        setName('Updated Name 222');
+    // console.log('name', name)
+    // console.log('nameChild', nameChild)
+    const updateNameAll = () => {
+        // console.log('updateName')
+        setNameAll([{ name: 'updateNameAll' }]);
+        console.log('nameAll', nameAll)
+    };
+
+    const updateNameFruit = () => {
+        // console.log('updateName')
+        setNameFruit([{ name: 'updateNameFruit' }]);
+        console.log('nameFruit', nameFruit)
     };
 
     return (
         <>
-            <h2 className=' text-xl text-sky-400/100'>Current name is: {name}</h2>
+            {nameAll.map((name, index) => (
+                <div key={index} className="py-1" >
+                    <h2 className=' text-xl text-sky-400/100'>Current name is: {name.name} type={name.type}</h2>
+                </div>
+            ))}
+            {/* <h2 className=' text-xl text-sky-400/100'>Current name is: {nameAll}</h2> */}
             <div className=' flex flex-row space-x-2'>
-                <button onClick={updateName}>Update Name</button>
+                <button onClick={updateNameAll}>Update Name</button>
             </div>
-            
-            <h2 className=' text-xl text-sky-400/100'>Current name is: {nameChild}</h2>
+
+            {nameFruit.map((name, index) => (
+                <div key={index} className="py-1" >
+                    <h2 className=' text-xl text-sky-400/100'>Current name is: {name.name} type={name.type}</h2>
+                </div>
+            ))}
+
+            {/* <h2 className=' text-xl text-sky-400/100'>Current name is: {nameFruit}</h2> */}
+            <div className=' flex flex-row space-x-2'>
+                <button onClick={updateNameFruit}>Update Name2</button>
+            </div>
+
+            {/* <h2 className=' text-xl text-sky-400/100'>Current name is: {nameChild}</h2>
             <div className=' flex flex-row space-x-2'>
                 <button onClick={() => setNameChild('Name New')}>Update Name</button>
-            </div>
+            </div> */}
 
         </>
     )

@@ -1,43 +1,30 @@
 'use client'
-
-// import { useContext, createContext, useState } from "react";
-
-// const AppContext = createContext<any>(undefined);
-
-// export function AppWrapper({ children }: {
-//     children: React.ReactNode;
-// }) {
-//     let [name, setName] = useState('name default')
-
-//     return (
-//         <AppContext.Provider value={{
-//             name, setName
-//         }}>
-//             {children}
-//         </AppContext.Provider>
-//     )
-// }
-
-// export function useAppContext() {
-//     return useContext(AppContext);
-// }
-
-
-import { createContext, Context, Dispatch, SetStateAction } from 'react';
-
-// Interface สำหรับ context
-interface AppContextType {
-    name: string;
-    setName: Dispatch<SetStateAction<string>>;
-}
-
-// ค่าเริ่มต้นสำหรับ context
-const defaultValues: AppContextType = {
-    name: '',
-    setName: () => {} // ฟังก์ชันว่างเปล่าที่ไม่ทำอะไร
-};
+import { TodosContextType, defaultValues } from '@/app/interface/context.interface';
+import { ITodos } from '@/app/interface/todos.interface';
+import { createContext, useState } from 'react';
 
 // สร้าง context
-const AppContext = createContext<AppContextType>(defaultValues);
+const AppContext = createContext<TodosContextType>(defaultValues);
+
+export const TestContext = ({children}: React.PropsWithChildren ) => {
+
+    const [nameAll, setNameAll] = useState<ITodos[]>(defaultValues.nameAll);
+    const [nameFruit, setNameFruit] = useState<ITodos[]>(defaultValues.nameFruit);
+
+    const contextValue = {
+        nameAll,
+        setNameAll,
+        nameFruit,
+        setNameFruit
+    }
+
+    return (
+        <>
+            <AppContext.Provider value={contextValue}>
+                {children}
+            </AppContext.Provider>
+        </>
+    )
+}
 
 export default AppContext;

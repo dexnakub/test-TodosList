@@ -1,7 +1,8 @@
-import ITodos from "./todos.interface";
+import {ITodos} from "./todos.interface";
 
 export default interface ICard {
     title?: string;
-    // onChange?: Function
+    datas?: ITodos[];
+    onFinishChildOne?: Function;
     // todos?: ITodos[]
 }

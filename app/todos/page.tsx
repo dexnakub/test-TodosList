@@ -2,28 +2,23 @@
 
 import React, { useState, useEffect, useContext, createContext, Dispatch, SetStateAction } from "react"
 
-import ITodos from "../interface/todos.interface"
+import { ITodos, ICardType, ITimerItem } from "../interface/todos.interface"
 import Card from "../components/Card"
 
 import { Grid } from "../components/styled"
 
-import Child from './child'
-// interface IContext {
-//     todosState: ITodos[];
-//     setTodosState: Dispatch<SetStateAction<ITodos[]>>;
-// }
-
-// const SidebarContext = React.createContext<IContext | null>(null);
+// import Child from './child'
+import AppContext, { TestContext } from "./context"
 
 
 export default function Todos() {
-    const [todosState, setTodosState] = useState<ITodos[]>([]);
+    // const [todosStateBackup, setTodosStateBackup] = useState<ITodos[]>([]);
     const [isLoading, setisLoading] = useState(true);
+    const [todosState, setTodosState] = useState<ITodos[]>([]);
     const [todosFruitState, setTodosFruitState] = useState<ITodos[]>([]);
+    const [todosVegetableState, setTodosVegetableState] = useState<ITodos[]>([]);
+    // const { nameAll, setNameAll, nameFruit, setNameFruit } = useContext(AppContext);
 
-    // const { todosState, setTodosState } = useContext(Context)
-
-    // const [name, setName] = useState('word');
 
     async function getData() {
         try {
@@ -39,11 +34,11 @@ export default function Todos() {
     }
 
     const initData = async () => {
-        // Update the document title using the browser API
         try {
             const result = await getData()
-            setTodosState(result)
             setisLoading(false)
+            // setTodosStateBackup(result)
+            setTodosState(result)
         } catch (error) {
             console.log('Error', error)
         }
@@ -53,37 +48,143 @@ export default function Todos() {
         initData()
     }, []);
 
-    // console.log('todosState', todosState)
+    const onFinishParent = (name: string, type: string) => {
+        const [removedDataClick, addDataClick]: [ITodos[], ITodos[]] = todosState.reduce((acc, curr) => {
+            if (curr.name !== name) {
+                acc[0].push(curr);
+            } else {
+                acc[1].push(curr);
+            }
+            return acc;
+        }, [[], []] as [ITodos[], ITodos[]]);
 
-    const onchange = (values: any) => {
-        setTodosFruitState(values)
+        setTodosState(removedDataClick);
+        startInterval(removedDataClick, addDataClick[0]);
     }
+
+    //------------------ test settimeout-------------------------
+    const [timerID, setTimerID] = useState([]);
+    const [timerQueue, setTimerQueue] = useState<ITimerItem[]>([]);
+    const [completedTimers, setCompletedTimers] = useState<string[]>([]);
+
+    // ฟังก์ชันในการเพิ่มหรืออัปเดตคิว
+    const updateTimerQueue = (id: any, timerId: any) => {
+        setTimerQueue((queue) => {
+            const itemExists = queue.some((item) => item.id === id);
+            if (!itemExists) {
+                return queue.concat({ id, timerId });
+            }
+            return queue.map((item) =>
+                item.id === id ? { ...item, timerId } : item
+            );
+        });
+    };
+
+    // ฟังก์ชันในการตั้งค่าเมื่อ timer สิ้นสุดการทำงาน
+    const handleTimerCompletion = (id: any, timerId: any) => {
+        clearTimeout(timerId);  // ล้าง timeout
+        setCompletedTimers((completed) => [...completed, id]);
+        setTimerQueue((queue) => queue.filter((item) => item.id !== id));  // ลบ timer ที่เสร็จสิ้นแล้วออกจาก queue
+    };
+
+    // แสดงผลค่า Queue ทุกครั้งที่มีการเปลี่ยนแปลง
+    useEffect(() => {
+        // console.log('Current Timer Queue:', timerQueue);
+    }, [timerQueue]);
+
+    // แสดงผลค่า Completed Timers ทุกครั้งที่มีการเปลี่ยนแปลง
+    useEffect(() => {
+        // console.log('Completed Timers:', completedTimers);
+    }, [completedTimers]);
+
+    //------------------ test settimeout-------------------------
+
+    const startInterval = (dataAll: ITodos[], dataAdd: ITodos) => {
+        const selectedState = dataCard.find(card => card.type == dataAdd.type)?.setState;
+        if (selectedState) {
+            selectedState(prevSeconds => [...prevSeconds, dataAdd]);
+
+            const id_q = dataAdd.name
+            const timerId = setTimeout(() => {
+                selectedState(prevSeconds => prevSeconds.filter(item => item.name !== dataAdd.name));
+                setTodosState(prevState => {
+                    if (prevState.some(data => data.name === dataAdd.name)) {
+                        return prevState
+                    } else {
+                        return [...prevState, dataAdd]
+                    }
+                });
+                handleTimerCompletion(id_q, timerId); // Pass timerId here
+            }, 5000);
+            updateTimerQueue(id_q, timerId);
+        }
+    }
+
+    const onFinishChild = (name: string, type: string) => {
+        let dataChild = { name: name, type: type }
+        const [removedDataClick, addDataClick]: [ITodos[], ITodos[]] = todosState.reduce((acc, curr) => {
+            if (curr.name !== name) {
+                acc[0].push(curr);
+            } else {
+                acc[1].push(curr);
+            }
+            return acc;
+        }, [[], []] as [ITodos[], ITodos[]]);
+
+        if (!addDataClick.length) {
+            const foundItem = timerQueue.find((item) => item.id === name);
+            const timerId = foundItem ? foundItem.timerId : undefined;
+
+            clearTimeout(timerId);  // ล้าง timeout
+            setTimerQueue((queue) => queue.filter((item) => item.id !== name));  // ลบ timer ที่เสร็จสิ้นแล้วออกจาก queue
+
+            const selectedState = dataCard.find(card => card.type == type)?.setState;
+            if (selectedState) {
+                selectedState(prevSeconds =>
+                    prevSeconds.filter(item => item.name != dataChild.name && item.type == dataChild.type)
+                );
+            }
+            setTodosState(prevState => [...prevState, dataChild]);
+        }
+    }
+
+    const dataCard: ICardType[] = [{
+        type: '',
+        state: todosState,
+        setState: setTodosState,
+        functionName: 'onFinishChildOne',
+        action: onFinishParent
+    }, {
+        type: 'Fruit',
+        state: todosFruitState,
+        setState: setTodosFruitState,
+        functionName: 'onFinishChildOne',
+        action: onFinishChild
+    }, {
+        type: 'Vegetable',
+        state: todosVegetableState,
+        setState: setTodosVegetableState,
+        functionName: 'onFinishChildOne',
+        action: onFinishChild
+    }];
 
     return (
         <>
+            {/* <TestContext> */}
+            {/* <Child ></Child> */}
             {isLoading && (<div className="max-w-screen-xl flex items-center justify-center mx-auto"> Loading... </div>)}
             {!isLoading && (<div className="max-w-screen-xl items-center justify-center mx-auto">
                 <Grid $rowGap='20px' $colGap='20px' $gridTemCol={3}>
-                    {/* {isLoading && (<div> Loading... </div>)} */}
-                    <div className="w-full">
-                        {/* {todosState.map((todos, index) => (
-                            <div key={index} className="py-1" >
-                                <Button name={todos.name} type={todos.type} />
-                            </div>
-                        ))} */}
-                        {/* <Card onChange={onchange} /> */}
-                        <Child></Child>
-
-                    </div>
-                    <div className="">
-                        <Card title="Fruit" />
-                    </div>
-                    <div className="">
-                        <Card title="Vegetable" />
-                    </div>
+                    {dataCard.map((card, index) => (
+                        <div key={index} className="h-[600px]">
+                            <Card title={card.type} datas={card.state} {...card.functionName ? { [card.functionName]: card.action } : null} />
+                            {/* <Card title={card.type} datas={card.state} onFinishChildOne={onFinishParent} /> */}
+                        </div>
+                    ))}
                 </Grid>
             </div>
             )}
+            {/* </TestContext> */}
         </>
     )
 }
