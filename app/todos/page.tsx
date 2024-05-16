@@ -21,7 +21,7 @@ export default function Todos() {
 
     async function getData() {
         try {
-            const response = await fetch('http://localhost:3000/api/todos').then(function (response) {
+            const response = await fetch('/api/todos').then(function (response) {
                 return response.json();
             }).then(function (data) {
                 return data.data
@@ -32,18 +32,18 @@ export default function Todos() {
         }
     }
 
-    const initData = async () => {
-        try {
-            const result = await getData()
-            setisLoading(false)
-            // setTodosStateBackup(result)
-            setTodosState(result)
-        } catch (error) {
-            console.log('Error', error)
-        }
-    }
-
     useEffect(() => {
+        const initData = async () => {
+            try {
+                const result = await getData()
+                setisLoading(false)
+                // setTodosStateBackup(result)
+                setTodosState(result)
+            } catch (error) {
+                console.log('Error', error)
+            }
+        }
+
         initData()
     }, []);
 
